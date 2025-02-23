@@ -1,6 +1,6 @@
 ---
 layout: distill
-title: Streaing Pipeline Blog Post
+title: Stremaing Pipeline Blog Post
 description: This blog post tasks about dealing with streaming data. 
 tags: distill formatting Kafka kafka data engineering
 giscus_comments: true
@@ -77,6 +77,21 @@ _styles: >
     font-size: 16px;
   }
 ---
+
+Generally, businesses used to use historical data to derive insights and improve their operations, but
+with data is being generated at an insane scale and speed relying only on batch processing isn’t enough anymore.
+Take fraud prevention system for example, it need to work on real time or it is useless. 
+
+Now, think about digital advertising. When a user loads a webpage, multiple partners analyze the opportunity and bid 
+to display their ad—all within milliseconds. The user doesn’t even notice that a real-time auction just happened to 
+decide which ad they’ll see.
+
+Or from my experience at WalmartLabs, where IoT-enabled trucks constantly emit data about geo-location, speed, Idle Time, Local Weather, Road condition, Shock and Vibration etc.
+or the refrigerators in walmart stores that continuously emitted data about , realtime temperature, humidity level, Door activity, Energy Consumption, and more. This data needs to be processed in real time to ensure everything runs smoothly, from delivery timelines to keeping perishable goods at the right temperature.
+
+And even a step further many businesses work on real time data. Digital advertising for example. In digital advertising, 
+as soon as a user tries to load a web page, various partners have to do their analysis and bid on that page to display their ad
+All this happens within miliseconds without users even noticing that someone took time to place bid and win an auction to display me this ad. 
 
 ## Key Points to consider for Streaming Data 
 1. **Data Source and Volume:** Identify the source of data for example if data source is IOT devices, Application Logs, Ad Auction (RTB) ect. 
