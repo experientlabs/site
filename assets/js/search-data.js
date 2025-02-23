@@ -79,9 +79,9 @@ ninja.data = [{
               handler: () => {
                 window.location.href = "/site/blog/";
               },
-            },{id: "post-streaing-pipeline-blog-post",
+            },{id: "post-stremaing-pipeline-blog-post",
       
-        title: "Streaing Pipeline Blog Post",
+        title: "Stremaing Pipeline Blog Post",
       
       description: "This blog post tasks about dealing with streaming data.",
       section: "Posts",
