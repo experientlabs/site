@@ -1,7 +1,7 @@
 ---
 layout: distill
-title: Stremaing Pipeline Blog Post
-description: This blog post tasks about dealing with streaming data. 
+title: Designing Streaming Data Pipeline
+description: The art of dealing with streaming data. 
 tags: distill formatting Kafka kafka data engineering
 giscus_comments: true
 date: 2025-02-15
@@ -78,30 +78,28 @@ _styles: >
   }
 ---
 
-Generally, businesses used to use historical data to derive insights and improve their operations, but
-with data is being generated at an insane scale and speed relying only on batch processing isn’t enough anymore.
-Take fraud prevention system for example, it need to work on real time or it is useless. 
+## Why Stream Processing?
+Generally, businesses used to use historical data to derive insights. But in digital era transactions are happening at 
+such an insane speed that batch processing isn’t going to work anymore. Take **fraud prevention system**  for example, 
+it need to work in real time or it is too late. 
 
-Now, think about digital advertising. When a user loads a webpage, multiple partners analyze the opportunity and bid 
-to display their ad—all within milliseconds. The user doesn’t even notice that a real-time auction just happened to 
-decide which ad they’ll see.
+Similarly in digital advertising (I work in AdTech) the decision to display an ad need to be made within milliseconds. 
+I can share more interesting things on this in a separate blog.
 
-Or from my experience at WalmartLabs, where IoT-enabled trucks constantly emit data about geo-location, speed, Idle Time, Local Weather, Road condition, Shock and Vibration etc.
-or the refrigerators in walmart stores that continuously emitted data about , realtime temperature, humidity level, Door activity, Energy Consumption, and more. This data needs to be processed in real time to ensure everything runs smoothly, from delivery timelines to keeping perishable goods at the right temperature.
+Or from my experience at WalmartLabs (Supply Chain), where IoT-enabled trucks constantly emit data about geo-location, speed, Idle Time, Local Weather, Road condition, Shock & Vibration etc.
+or the refrigerators in walmart stores that continuously emitted data about realtime temperature fluctuations, humidity levels, Door activity, Energy Consumption etc. 
+These data needs to be read in real time so that business decisions can be made. 
 
-And even a step further many businesses work on real time data. Digital advertising for example. In digital advertising, 
-as soon as a user tries to load a web page, various partners have to do their analysis and bid on that page to display their ad
-All this happens within miliseconds without users even noticing that someone took time to place bid and win an auction to display me this ad. 
+**Now this brings us to next point and that is What are various points to consider while building a stream processing sytem.** 
 
 ## Key Points to consider for Streaming Data 
-1. **Data Source and Volume:** Identify the source of data for example if data source is IOT devices, Application Logs, Ad Auction (RTB) ect. 
-And based on type of source, number of users and looking at stats, you can get the estimate of volume and velocity of data. Volume and velocity
-are key things that helps us in designing appropriate system.
+1. **Data Source and Volume:** Identify the source of data for example if data source is IOT device, Application Logs, Ad Auction (RTB) ect. 
+And based on source, volume, and velocity we can design a perfect system.
 
 
-2. **Latency Requirements:** How quick the data is needed downstream. For example if we are talking about financial transaction then data is 
-needed immediate to mark the order for processing similarly for a leaderboard app data is needed immediately(real time). But if we talk about
-Monitoring system, then generally it is normal to have some latency from few seconds to few minutes of even an hour. 
+2. **Latency Requirements:** How quick the data is needed downstream. For example: financial transaction data is 
+needed immediately to mark the transaction success. Similarly for a leaderboard app data is needed immediately(real time). But if we talk about
+Monitoring system, then it is normal to have some latency from few seconds to few minutes. 
 
 
 3. **Fault Tolerance:** Based on type of source system we can understand what kind of risk we can face, for example system crash, data loss, 
@@ -109,29 +107,50 @@ connectivity issue with IOT device etc. And this helps us in creating system tha
 data locally when network connectivity is lost and send that data once connectivity is gained. 
 
 
-4. **Scalability, Throughput:** Should system expect increase in data volume over time, if yes then it should be able to handle data growth by scaling horizontally.
+4. **Scalability, Throughput:** Should system expect increase in data volume over time, if yes then it should be able to
+handle data growth by scaling horizontally.
 
 
-5. **Data Quality:** Generally there should be ways to validate the data(accuracy and consistency) in real-time, so that end system is able to handle it
-for example; downstream transformations/processing can fail due to data quality of even if it succeeds it will shows correct info if data quality is compromised. 
-Consider a leaderboard showing incorrect ranking. 
+5. **Data Quality:** While we should know what data quality checks should be done. Sometimes there is a need to validate 
+and transform data and that can influence which tools to use while designing a streaming system.
 
-What are various Tools available:
-1. Apache Kafka
-2. Apache Flink
-3. Spark Streaming
-4. Amazon Kinesis and Google pub/sub
-5. RabbitMQ
+
+#### What are various Tools available:
+
+1. **Apache Kafka:** Low Latency(sub ms) and High Throughput (millions message per second). Can scale horizontally, 
+and store messages. It is suitable for Real time streaming Big Data use case.
+2. **Apache Flink:**  True real time similar to Kafka, with sub millisecond latency and built in stateful processing
+3. **Spark Streaming:** Not a real time system, can work on micro-batch with latency in seconds to minutes. 
+Scales well and suitable for in memory transformations 
+4. **Amazon Kinesis and Google pub/sub:** Cloud native and compares well with Kafka with their additional features. 
+5. **RabbitMQ:** Limited due to high latency (milliseconds) & low throughput (1000msg/sec). Also limited scalability as it has single broker. Generally used as task queue, or decoupling not fit for real time big data. 
+
+> **Are you wondering what is stateful processing in Apache Flink:**  
+
+> It is an ability to remember past information and take decisions based on past events. Like it can track how many 
+times a particular event occurred so that some action can be triggered. Stateful processing means it can maintain 
+running aggregations (totals, averages) over time. Can track user session (start time, end time, action taken). You can 
+read more on Flink states in a flink blog. 
 
 Now based on above points we can decide on any of these applications:
+- If there is a need for Just ingesting data with a latency of milliseconds without processing it then **RabbitMQ** is 
+a great choice for light weight applications
+- Bug for high throughput and low latency **Kafka** suits well and it scales with increasing volume. In cloud Kinesis can be an option. 
+- If we talk about real time ingest with transformation and stateful computations then **Apache Flink** takes in with 
+additional features than Kafka.
+- And **Spark Streaming** if micro-batch and transformation engine is what you need (don't need realtime, ok with seconds to minutes latency).
+- There are various other tools like **Snowflake Streams**, **Apache pulsar** that suits various environments. 
 
-- If there is a need for Just ingesting the data without processing it then **RabbitMQ** is a great choice for light weight applications
-- With high throughput and scalability in mind **Kafka** replaces RabbitMQ, for in cloud Kinesis is an option. 
-- If we talk about real time ingest with transformation and stateful computations then **Apache Flink** takes in.
-- And **Spark Streaming** if micro-batch and transformation is what you need (don't need realtime, ok with seconds to minutes latency).
-- There are various other tools like Snowflake Streams, Apache pulsar that suits various environments, so you can do 
-
-
+### So the best way to go about selecting a tech is:
+1. First select based on wider categorization: For example if I have to work on Advertising Data
+then I will strike off Spark Streaming as it is not real time and Rabbit MQ as it has high latency and can't scale well
+for internet scale data. 
+2. Then I am left with Kafka, Kinesis/pub-sub, Apache Flink, Now I can select or leave Kinesis/pub-sub based on my decision go ahead with cloud services.
+Let's say I don't want to use cloud services due to vendor lock-in concerns then I am left with fewer options, Kakfa and Flink
+3. Now I can further strike-off Flink for its high learning curve and chose Kafka. 
+4. But a real engineer will do POCs and evaluations, around Kafka alternatives. 
+   - For example will MSK (Amazon Managed Kafka) be cheaper and easy to manage.
+   - Does Redpanda (a kafka competitor) offer better cost or perfromance. 
 
 Competitions: Kinesis, Apache Pulsar and recently Redpanda
 
