@@ -80,39 +80,42 @@ _styles: >
 
 ## Why Stream Processing?
 Generally, businesses used to use historical data to derive insights. But in digital era transactions are happening at 
-such an insane speed that batch processing isn’t going to work anymore. Take **fraud prevention system**  for example, 
+insane speed and batch processing isn’t going to work anymore. Take **fraud prevention system**  for example, 
 it need to work in real time or it is too late. 
 
 Similarly in digital advertising (I work in AdTech) the decision to display an ad need to be made within milliseconds. 
 I can share more interesting things on this in a separate blog.
 
-Or from my experience at WalmartLabs (Supply Chain), where IoT-enabled trucks constantly emit data about geo-location, speed, Idle Time, Local Weather, Road condition, Shock & Vibration etc.
-or the refrigerators in walmart stores that continuously emitted data about realtime temperature fluctuations, humidity levels, Door activity, Energy Consumption etc. 
+Or from my past experience at WalmartLabs (Supply Chain), where IoT-enabled trucks constantly emit data about geo-location, 
+speed, Idle Time, Local Weather, Road condition and Shock & Vibration etc. or the refrigerators in walmart stores that 
+continuously emitted data about realtime temperature fluctuations, humidity levels, door activity, energy consumption etc. 
 These data needs to be read in real time so that business decisions can be made. 
 
-**Now this brings us to next point and that is What are various points to consider while building a stream processing sytem.** 
+**Now this brings us to next point and that is: What points to consider while building a stream processing system?** 
 
 ## Key Points to consider for Streaming Data 
-1. **Data Source and Volume:** Identify the source of data for example if data source is IOT device, Application Logs, Ad Auction (RTB) ect. 
-And based on source, volume, and velocity we can design a perfect system.
+1. **Data Source and Volume:** Identify the source of data for example is data source an IOT device, Application Logs or
+Ad Auction (RTB) ect. And based on source, volume, and velocity we can design a perfect system.
 
 
-2. **Latency Requirements:** How quick the data is needed downstream. For example: financial transaction data is 
-needed immediately to mark the transaction success. Similarly for a leaderboard app data is needed immediately(real time). But if we talk about
-Monitoring system, then it is normal to have some latency from few seconds to few minutes. 
+2. **Latency Requirements:** How quick the data is needed downstream. i.e. financial transaction data needed immediately
+to mark the transaction success. Similarly a leaderboard app data should be real time. But if we talk about Monitoring 
+system, then it is normal to have some latency from few seconds to few minutes. 
 
 
-3. **Fault Tolerance:** Based on type of source system we can understand what kind of risk we can face, for example system crash, data loss, 
-connectivity issue with IOT device etc. And this helps us in creating system that will handle adverse scenario, like adding a system to store 
-data locally when network connectivity is lost and send that data once connectivity is gained. 
+3. **Fault Tolerance:** Based on type of source we can understand what kind of risk we can face, for example system crash, 
+data loss, connectivity issue with IOT device etc. And this helps us in creating system that will handle adverse scenario,
+like adding a mechanism to store data locally when network connectivity is lost and send that data once connection is 
+established. 
 
 
-4. **Scalability, Throughput:** Should system expect increase in data volume over time, if yes then it should be able to
-handle data growth by scaling horizontally.
+4. **Scalability, Throughput:** Next question is: does system expect increase in data volume over time, if yes then how 
+much data growth, i.e. This answer helps us to decide if Vertical scaling will be sufficient or Horizontal scaling is 
+needed.
 
 
-5. **Data Quality:** While we should know what data quality checks should be done. Sometimes there is a need to validate 
-and transform data and that can influence which tools to use while designing a streaming system.
+5. **Data Quality:** Next we can think about, what data quality checks should be done. Sometimes there is a need to validate 
+and transform data in a way that it need stateful system and that can influence which tools to use while designing a streaming system.
 
 
 #### What are various Tools available:
