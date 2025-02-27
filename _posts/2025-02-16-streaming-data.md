@@ -79,7 +79,7 @@ _styles: >
 ---
 
 ## Why Stream Processing?
-Generally, businesses used to use historical data to derive insights. But in digital era transactions are happening at 
+Generally, businesses used historical data to derive insights. But in digital era transactions are happening at 
 insane speed and batch processing isn’t going to work anymore. Take **fraud prevention system**  for example, 
 it need to work in real time or it is too late. 
 
@@ -153,23 +153,130 @@ Let's say I don't want to use cloud services due to vendor lock-in concerns then
 3. Now I can further strike-off Flink for its high learning curve and chose Kafka. 
 4. But a real engineer will do POCs and evaluations, around Kafka alternatives. 
    - For example will MSK (Amazon Managed Kafka) be cheaper and easy to manage.
-   - Does Redpanda (a kafka competitor) offer better cost or perfromance. 
+   - Does Redpanda (a kafka competitor) offer better cost or performance. 
 
-Competitions: Kinesis, Apache Pulsar and recently Redpanda
 
 ---
 
-## Citations
+1️⃣ BufStream: Kafka On Iceberg
+The newest player in the game, BufStream, uses Apache Iceberg as its storage layer instead of Kafka’s traditional log segments.
 
-Citations are then used in the article body with the `<d-cite>` tag.
-The key attribute is a reference to the id provided in the bibliography.
-The key attribute can take multiple ids, separated by commas.
+- The Iceberg format opens up the storage layer as a data lake
 
-The citation is presented inline like this: <d-cite key="gregor2015draw"></d-cite> (a number that displays more information on hover).
-If you have an appendix, a bibliography is automatically created and populated in it.
+- No-disk architecture reduces costs and increases scalability.
 
-Distill chose a numerical inline citation style to improve readability of citation dense articles and because many of the benefits of longer citations are obviated by displaying more information on hover.
-However, we consider it good style to mention author last names if you discuss something at length and it fits into the flow well — the authors are human and it’s nice for them to have the community associate them with their work.
+- Kafka API compatibility ensures existing applications just work.
+
+BufStream is a bold take on rethinking Kafka from the ground up, proving that even a batch-first table format like Iceberg can power real-time streaming workloads.
+Apache Iceberg™ as your Kafka storage layer
+Bufstream natively writes your data to S3-compatible object storage as Iceberg tables with zero copies. Eliminate the need for a costly ETL pipeline and start querying your data in seconds.
+
+### Kafka Cluster
+![img.png](img.png)
+
+
+### Block Diagram
+```
++-----------------+     +-----------------+     +-----------------+
+| Kafka Broker 1  | <--> | Kafka Broker 2  | <--> | Kafka Broker 3  | ...
++-----------------+     +-----------------+     +-----------------+
+       ^                         ^                         ^
+       |                         |                         |
++---------------+     +---------------+     +---------------+
+|  Producer 1   |     |  Producer 2   |     |  Consumer 1   | ...
++---------------+     +---------------+     +---------------+
+       |                         |                         |
+       v                         v                         v
++-------------------------------------------------------------+
+|                               Kafka Cluster                  |
++-------------------------------------------------------------+
+       ^
+       | (KRaft nodes or Zookeeper ensemble)
++-----------------+     +-----------------+     +-----------------+
+|   KRaft Node 1   | <--> |   KRaft Node 2   | <--> |   KRaft Node 3   | ...
+| or Zookeeper 1  |     | or Zookeeper 2  |     | or Zookeeper 3  | ...
++-----------------+     +-----------------+     +-----------------+
+       |
++---------------------+
+|   Schema Registry   | (Optional)
++---------------------+
+       |
++---------------------+
+|   Kafka Connect     | (Optional)
++---------------------+
+       |
++---------------------+
+|   Kafka Streams     | (Optional)
++---------------------+
+       |
++---------------------+
+| Monitoring/Management|
++---------------------+
+```
+
+### Do we need separate cluster for kraft in kafka? Like we did for zookeepr?
+
+
+No, you do not need a separate cluster for KRaft in Kafka; KRaft mode is a configuration within your existing Kafka cluster that eliminates the need for a separate ZooKeeper cluster, allowing you to manage all cluster metadata directly within the Kafka brokers themselves, essentially making KRaft a feature within your Kafka cluster, not a separate cluster. 
+
+
+
+### There is an application emitting real time logs and that log is pushed to Kafka:
+- What are various options to push that log to kafka
+- What is the risk here, I mean point of failure that can result in few logs are not pushed. 
+- How can we ensure that no log is missed, what monitoring and guardrails are needed
+
+
+### In sync Replica and Out of Sync Replica
+
+
+### Where does kafka broker stores message, how to see it?
+A Kafka broker stores messages on the local disk of the server it runs on, within a designated directory configured by the "log.dir" property in the Kafka configuration; to see where Kafka stores messages, you can access the specified directory on the broker machine using your file system explorer, where you will find topic-partition specific subdirectories containing the actual message data in log files. 
+
+Access the directory:
+- Navigate to the "log.dir" directory on the Kafka broker machine using your file system explorer. 
+- You will see subdirectories representing different topics and their partitions. 
+
+
+### Risks and Points of Failure
+1. Application Failures
+   - Buffer Logs locally before sending them to Kafka
+   - Use reliable logging library with retries and error handling
+2. Network Issues
+   - Use kafka producer retries and idempotent producers.
+   - Use local buffering to store logs locally. 
+3. Kafka Broker Failure
+   - Use a highly available kafka cluster with replication.
+   - **Monitor broker health** and set up **alerts**
+4. Data Loss in Buffers
+   - Use durable storage for buffering (e.g., disk instead of memory)
+   - Regularly flush buffers to Kafka
+
+### Ensuring No Logs Are Missed
+1. Idempotent Producers: Ensure messages are not duplicated even if retries occur.
+2. Acknowledgment (acks): Set acks=all in the Kafka producer to ensure logs are replicated to all in-sync replicas.
+3. Monitor Producer Metrics: `record-error-rate`, record-retry-rate, and request-latency
+4. Set up alerts for high error or retry rates.
+5. Monitor consumer lag to ensure logs are being processed in a timely manner.
+6. Monitor broker metrics like under-replicated-partitions, active-controller-count, and request-handler-avg-idle-percent.
+
+### End-to-End Testing
+- Test Failures: Simulate failures (e.g., network interruptions, broker crashes) to ensure the pipeline recovers gracefully.
+- Data Validation: Verify that all logs are successfully ingested and processed.
+
+### Backup and Recovery
+- Replication: Use Kafka replication to ensure logs are stored on multiple brokers.
+- Backup: Regularly back up Kafka data to a secondary cluster or cloud storage (e.g., S3).
+
+---
+
+## Implementation
+
+Let's say I have a kafka consumer subscribed to a topic and it writes data in minio buckets in partitions of 5 minutes. 
+- Can I directly write this data to iceberg table. How? 
+- Is it different from buffstream, How?
+
+Implement schema registry
 
 ---
 
